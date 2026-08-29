@@ -11,7 +11,7 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.HealthSherpa.HttpClients;
 
-///<inheritdoc cref="IHealthSherpaOpenApiHttpClient"/>
+/// <inheritdoc cref="IHealthSherpaOpenApiHttpClient"/>
 public sealed class HealthSherpaOpenApiHttpClient : IHealthSherpaOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
