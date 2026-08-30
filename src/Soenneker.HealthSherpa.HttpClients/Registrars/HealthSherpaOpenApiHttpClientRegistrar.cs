@@ -11,7 +11,7 @@ namespace Soenneker.HealthSherpa.HttpClients.Registrars;
 public static class HealthSherpaOpenApiHttpClientRegistrar
 {
     /// <summary>
-    /// Adds <see cref="HealthSherpaOpenApiHttpClient"/> as a singleton service. <para/>
+    /// Adds the HealthSherpa HTTP client provider and its cache as singleton services.
     /// </summary>
     /// <param name="services">Service collection that receives the registration.</param>
     /// <returns>The same service collection, so additional registrations can be chained.</returns>
@@ -24,13 +24,13 @@ public static class HealthSherpaOpenApiHttpClientRegistrar
     }
 
     /// <summary>
-    /// Adds <see cref="HealthSherpaOpenApiHttpClient"/> as a scoped service. <para/>
+    /// Adds the HealthSherpa HTTP client provider and its cache as scoped services.
     /// </summary>
     /// <param name="services">Service collection that receives the registration.</param>
     /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddHealthSherpaOpenApiHttpClientAsScoped(this IServiceCollection services)
     {
-        services.AddHttpClientCacheAsSingleton()
+        services.AddHttpClientCacheAsScoped()
                 .TryAddScoped<IHealthSherpaOpenApiHttpClient, HealthSherpaOpenApiHttpClient>();
 
         return services;

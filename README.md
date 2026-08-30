@@ -1,43 +1,57 @@
 [![](https://img.shields.io/nuget/v/soenneker.healthsherpa.httpclients.svg?style=for-the-badge)](https://www.nuget.org/packages/soenneker.healthsherpa.httpclients/)
 [![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.healthsherpa.httpclients/publish-package.yml?style=for-the-badge)](https://github.com/soenneker/soenneker.healthsherpa.httpclients/actions/workflows/publish-package.yml)
+[![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.healthsherpa.httpclients/build-and-test.yml?style=for-the-badge&label=build)](https://github.com/soenneker/soenneker.healthsherpa.httpclients/actions/workflows/build-and-test.yml)
+[![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.healthsherpa.httpclients/codeql.yml?style=for-the-badge&label=codeql)](https://github.com/soenneker/soenneker.healthsherpa.httpclients/actions/workflows/codeql.yml)
 [![](https://img.shields.io/nuget/dt/soenneker.healthsherpa.httpclients.svg?style=for-the-badge)](https://www.nuget.org/packages/soenneker.healthsherpa.httpclients/)
 
 # Soenneker.HealthSherpa.HttpClients
 
-A .NET thread-safe singleton HttpClient for.
+Provides a cached `HttpClient` configured with HealthSherpa's API base address and API-key header.
 
-## Install
+## Installation
 
 ```bash
 dotnet add package Soenneker.HealthSherpa.HttpClients
 ```
 
-## Quick start
+## Configuration
 
-```csharp
-using Soenneker.HealthSherpa.HttpClients.Registrars;
-using Microsoft.Extensions.DependencyInjection;
-
-var services = new ServiceCollection();
-var result = services.AddHealthSherpaOpenApiHttpClientAsSingleton();
+```json
+{
+  "HealthSherpa": {
+    "ApiKey": "<API key>"
+  }
+}
 ```
 
-Adds `HealthSherpaOpenApiHttpClient` as a singleton service.
+The default base address is `https://api.one.healthsherpa.com`, and the default authentication header is `x-api-key: {token}`. Override them when using another HealthSherpa environment or authentication gateway:
 
-## What you get
+```json
+{
+  "HealthSherpa": {
+    "ClientBaseUrl": "https://api.one.healthsherpa.com",
+    "AuthHeaderName": "x-api-key",
+    "AuthHeaderValueTemplate": "{token}"
+  }
+}
+```
 
-- `IHealthSherpaOpenApiHttpClient` — A .NET thread-safe singleton HttpClient for.
-- `HealthSherpaOpenApiHttpClientRegistrar` — Registers the OpenAPI HttpClient wrapper for dependency injection.
+`{token}` is replaced with `HealthSherpa:ApiKey` when the client is created.
 
-## API at a glance
+## Registration and usage
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `HealthSherpaOpenApiHttpClientRegistrar.AddHealthSherpaOpenApiHttpClientAsSingleton(services)` | Adds `HealthSherpaOpenApiHttpClient` as a singleton service. | The same service collection, so additional registrations can be chained. |
-| `HealthSherpaOpenApiHttpClientRegistrar.AddHealthSherpaOpenApiHttpClientAsScoped(services)` | Adds `HealthSherpaOpenApiHttpClient` as a scoped service. | The same service collection, so additional registrations can be chained. |
+```csharp
+using Soenneker.HealthSherpa.HttpClients.Abstract;
+using Soenneker.HealthSherpa.HttpClients.Registrars;
 
-## Practical notes
+services.AddHealthSherpaOpenApiHttpClientAsSingleton();
 
-- Reuse the registered client instead of constructing one per operation.
-- Calls that return a cached or singleton value reuse the same instance until the owning service is disposed.
-- Dispose instances you own when their scope ends so held resources can be released.
+IHealthSherpaOpenApiHttpClient provider =
+    serviceProvider.GetRequiredService<IHealthSherpaOpenApiHttpClient>();
+
+HttpClient client = await provider.Get(cancellationToken);
+```
+
+`Get()` lazily creates and then reuses the client for the provider's lifetime. Dispose the provider, not the returned `HttpClient`, when you own the provider.
+
+`AddHealthSherpaOpenApiHttpClientAsScoped()` gives each dependency-injection scope an independent cache and client. Higher-level scoped API utilities should use the singleton provider registration when the transport must remain alive after an individual utility scope is disposed.
