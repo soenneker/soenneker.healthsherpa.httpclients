@@ -5,6 +5,7 @@ using Soenneker.HealthSherpa.HttpClients.Abstract;
 using Soenneker.HealthSherpa.HttpClients.Registrars;
 using Soenneker.Tests.HostedUnit;
 using Soenneker.Utils.HttpClientCache.Abstract;
+using System.Threading;
 
 namespace Soenneker.HealthSherpa.HttpClients.Tests;
 
@@ -25,7 +26,7 @@ public sealed class HealthSherpaOpenApiHttpClientTests : HostedUnitTest
     }
 
     [Test]
-    public async ValueTask Scoped_registration_owns_an_independent_cache()
+    public async ValueTask Scoped_registration_owns_an_independent_cache(CancellationToken cancellationToken)
     {
         var services = new ServiceCollection();
 
