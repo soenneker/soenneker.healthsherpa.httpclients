@@ -29,7 +29,7 @@ public sealed class HealthSherpaOpenApiHttpClient : IHealthSherpaOpenApiHttpClie
     {
         return _httpClientCache.Get(nameof(HealthSherpaOpenApiHttpClient), (config: _config, baseUrl: _config["HealthSherpa:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
-            var apiKey = state.config.GetValueStrict<string>("HealthSherpa:ApiKey");
+            var apiKey = state.config.GetStringStrict("HealthSherpa:ApiKey");
             string authHeaderName = state.config["HealthSherpa:AuthHeaderName"] ?? "x-api-key";
             string authHeaderValueTemplate = state.config["HealthSherpa:AuthHeaderValueTemplate"] ?? "{token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
